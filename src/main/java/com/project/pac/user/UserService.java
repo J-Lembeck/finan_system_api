@@ -1,5 +1,6 @@
 package com.project.pac.user;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,11 +31,15 @@ public class UserService {
 	}
 
 	public UserBean login(UserBean user) {
-		UserModel userModel = userRepository.findByUserNameAndPassword(user.getUserName(), user.getPassword());
+		UserModel userModel = userRepository.findByUserName(user.getUserName());
 
 		if (userModel != null) {
-			user.setId(userModel.getId());
-			user.setAuth(true);
+			if(BCrypt.checkpw(user.getPassword(), userModel.getPassword())) {
+				user.setId(userModel.getId());
+				user.setAuth(true);
+			}else {
+				user.setAuth(false);
+			}
 		} else {
 			user.setAuth(false);
 		}
